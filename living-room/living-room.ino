@@ -27,10 +27,10 @@ Device *deviceThree = NULL;
 Device *deviceFour = NULL;
 
 // Set Relay Pins
-int relayOne = 12;
-int relayTwo = 13;
-int relayThree = 14;
-int relayFour = 16;
+int relayOne = 12; //D6=GPI012
+int relayTwo = 13; //D7=GPI013
+int relayThree = 14; //D5=GPI014
+int relayFour = 16; //D0=GPI016
 
 void setup()
 {
