@@ -9,7 +9,7 @@ Device::Device(){
 Device::Device(String alexaInvokeName, unsigned int port, CallbackFunction oncb, CallbackFunction offcb){
     uint32_t chipId = ESP.getChipId();
     char uuid[64];
-    sprintf_P(uuid, PSTR("38323636-4558-4dda-9188-cda0e6%02x%02x%02x"),
+    sprintf_P(uuid, PSTR("38323636-4558-4dda-9189-cda0e6%02x%02x%02x"),
           (uint16_t) ((chipId >> 16) & 0xff),
           (uint16_t) ((chipId >>  8) & 0xff),
           (uint16_t)   chipId        & 0xff);

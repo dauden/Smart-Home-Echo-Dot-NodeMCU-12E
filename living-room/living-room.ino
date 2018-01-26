@@ -1,10 +1,10 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <functional>
-#include "../libs/WifiManagement.h"
-#include "../libs/Device.h"
-#include "../libs/UpnpBroadcastResponder.h"
-#include "../libs/CallbackFunction.h"
+#include "WifiManagement.h"
+#include "Device.h"
+#include "UpnpBroadcastResponder.h"
+#include "CallbackFunction.h"
 
 //on/off callbacks 
 void deviceOneOn();
@@ -30,7 +30,7 @@ Device *deviceFour = NULL;
 int relayOne = 12; //D6=GPI012
 int relayTwo = 13; //D7=GPI013
 int relayThree = 14; //D5=GPI014
-int relayFour = 16; //D0=GPI016
+int relayFour = 2; //D4=GPI02
 
 void setup()
 {
@@ -44,10 +44,10 @@ void setup()
     
     // Define your Devicees here. Max 14
     // Format: Alexa invocation name, local port no, on callback, off callback
-    deviceOne = new Device("Living Left", 80, deviceOneOn, deviceOneOff);
-    deviceTwo = new Device("Living Light", 81, deviceTwoOn, deviceTwoOff);
-    deviceThree = new Device("Living Center", 82, deviceThreeOn, deviceThreeOff);
-    deviceFour = new Device("Living Outlet", 83, deviceFourOn, deviceFourOff);
+    deviceOne = new Device("Living Left", 81, deviceOneOn, deviceOneOff);
+    deviceTwo = new Device("Living Right", 82, deviceTwoOn, deviceTwoOff);
+    deviceThree = new Device("Living Center", 83, deviceThreeOn, deviceThreeOff);
+    deviceFour = new Device("Living Outlet", 84, deviceFourOn, deviceFourOff);
 
     Serial.println("Adding Devicees upnp broadcast responder");
     upnpBroadcastResponder.addDevice(*deviceOne);
@@ -59,8 +59,17 @@ void setup()
     pinMode(12,OUTPUT); 
     pinMode(13,OUTPUT);
     pinMode(14,OUTPUT);
-    pinMode(16,OUTPUT);
+    pinMode(2,OUTPUT);
 
+    //Set each relay pin to HIGH
+    digitalWrite(relayOne, HIGH);   // sets relayOne on
+    delay(500);
+    digitalWrite(relayTwo, HIGH);   // sets relayOne on
+    delay(500);
+    digitalWrite(relayThree, HIGH);   // sets relayOne on
+    delay(500);
+    digitalWrite(relayFour, HIGH);   // sets relayOne on
+    delay(500);
   }
 }
  
