@@ -9,7 +9,7 @@ Device::Device(){
 Device::Device(String alexaInvokeName, unsigned int port, CallbackFunction oncb, CallbackFunction offcb){
     uint32_t chipId = ESP.getChipId();
     char uuid[64];
-    sprintf_P(uuid, PSTR("38323636-4558-4dda-9188-cda0e6%02x%02x%02x"),
+    sprintf_P(uuid, PSTR("38323636-4558-4dda-9189-cda0e6%02x%02x%02x"),
           (uint16_t) ((chipId >> 16) & 0xff),
           (uint16_t) ((chipId >>  8) & 0xff),
           (uint16_t)   chipId        & 0xff);
@@ -46,18 +46,22 @@ void Device::startWebServer(){
   });
  
 
-  server->on("/setup.xml", [&]() {
+  server->on("/setup.xml", HTTP_GET, [&]() {
     handleSetupXml();
   });
 
-  server->on("/upnp/control/basicevent1", [&]() {
+  server->on("/upnp/control/basicevent1", HTTP_POST, [&]() {
     handleUpnpControl();
   });
 
-  server->on("/eventservice.xml", [&]() {
+  server->on("/eventservice.xml", HTTP_GET, [&]() {
     handleEventservice();
   });
 
+  server->on("/switch", HTTP_GET, [&]() {
+    handleSwitch();  
+  });
+  
   //server->onNotFound(handleNotFound);
   server->begin();
   Serial.println("WebServer started on port: ");
@@ -114,12 +118,28 @@ void Device::handleUpnpControl(){
       Serial.println("Got Turn off request");
       offCallback();
   }
-  
-  server->send(200, "text/plain", "");
+  Serial.println("responing text");
+  server->send(200, "text/plain", "Ok");
+  Serial.println("reponded!!!!!");
 }
 
 void Device::handleRoot(){
   server->send(200, "text/plain", "You should tell Alexa to discover devices");
+}
+
+void Device::handleSwitch(){
+  Serial.println("########## Responding to switch on/off get request ... ##########");
+  int request = (server->arg(0)).toInt();
+  if(request == 1) {
+      Serial.println("Got switch Turn on request");
+      onCallback();
+  }
+  
+  if(request == 0) {
+      Serial.println("Got switch Turn off request");
+      offCallback();
+  }
+  server->send(200, "text/plain", "Switch is ok!");
 }
 
 void Device::handleSetupXml(){

@@ -46,18 +46,22 @@ void Device::startWebServer(){
   });
  
 
-  server->on("/setup.xml", [&]() {
+  server->on("/setup.xml", HTTP_GET, [&]() {
     handleSetupXml();
   });
 
-  server->on("/upnp/control/basicevent1", [&]() {
+  server->on("/upnp/control/basicevent1", HTTP_POST, [&]() {
     handleUpnpControl();
   });
 
-  server->on("/eventservice.xml", [&]() {
+  server->on("/eventservice.xml", HTTP_GET, [&]() {
     handleEventservice();
   });
 
+  server->on("/switch", HTTP_GET, [&]() {
+    handleSwitch();  
+  });
+  
   //server->onNotFound(handleNotFound);
   server->begin();
   Serial.println("WebServer started on port: ");
@@ -115,11 +119,26 @@ void Device::handleUpnpControl(){
       offCallback();
   }
   
-  server->send(200, "text/plain", "");
+  server->send(200, "text/plain", "Ok");
 }
 
 void Device::handleRoot(){
   server->send(200, "text/plain", "You should tell Alexa to discover devices");
+}
+
+void Device::handleSwitch(){
+  Serial.println("########## Responding to switch on/off get request ... ##########");
+  int request = (server->arg(0)).toInt();
+  if(request == 1) {
+      Serial.println("Got switch Turn on request");
+      onCallback();
+  }
+  
+  if(request == 0) {
+      Serial.println("Got switch Turn off request");
+      offCallback();
+  }
+  server->send(200, "text/plain", "Switch is ok!");
 }
 
 void Device::handleSetupXml(){

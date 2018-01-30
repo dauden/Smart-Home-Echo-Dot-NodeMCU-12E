@@ -23,6 +23,7 @@ private:
         void handleUpnpControl();
         void handleRoot();
         void handleSetupXml();
+        void handleSwitch();
 public:
         Device();
         Device(String alexaInvokeName, unsigned int port, CallbackFunction onCallback, CallbackFunction offCallback);

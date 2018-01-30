@@ -5,7 +5,8 @@
 // Multicast declarations
 IPAddress ipMulti(239, 255, 255, 250);
 const unsigned int portMulti = 1900;
-char packetBuffer[512];   
+unsigned int localPort = 1900;      // local port to listen on
+char packetBuffer[UDP_TX_PACKET_MAX_SIZE];   
 
 #define MAX_DeviceES 14
 Device Devicees[MAX_DeviceES] = {};
@@ -62,10 +63,14 @@ void UpnpBroadcastResponder::serverLoop(){
   unsigned int senderPort = UDP.remotePort();
   
   // read the packet into the buffer
-  UDP.read(packetBuffer, packetSize);
+  int len = UDP.read(packetBuffer, 255);
   
+  if (len > 0) {
+    packetBuffer[len] = 0;
+  }
+
   // check if this is a M-SEARCH for WeMo device
-  String request = String((char *)packetBuffer);
+  String request = packetBuffer;
 
   if(request.indexOf('M-SEARCH') > 0) {
       if(request.indexOf("urn:Belkin:device:**") > 0) {
@@ -82,4 +87,5 @@ void UpnpBroadcastResponder::serverLoop(){
         }
       }
   }
+  delay(10);
 }
