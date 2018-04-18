@@ -21,7 +21,7 @@ Device *deviceOne = NULL;
 Device *deviceTwo = NULL;
 
 // Set Relay Pins
-int relayOne = 12; //D6=GPI012
+int relayOne = 2; //D4=GPIO2
 int relayTwo = 13; //D7=GPI013
 
 void setup()
@@ -36,16 +36,16 @@ void setup()
     
     // Define your Devicees here. Max 14
     // Format: Alexa invocation name, local port no, on callback, off callback
-    deviceOne = new Device("Kitchen Fan", 81, deviceOneOn, deviceOneOff);
-    deviceTwo = new Device("Kitchen Light", 82, deviceTwoOn, deviceTwoOff);
+    deviceOne = new Device("Kitchen Light", 81, deviceOneOn, deviceOneOff);
+    deviceTwo = new Device("Kitchen Center", 82, deviceTwoOn, deviceTwoOff);
     
     Serial.println("Adding Devicees upnp broadcast responder");
     upnpBroadcastResponder.addDevice(*deviceOne);
     upnpBroadcastResponder.addDevice(*deviceTwo);
     
     //Set relay pins to outputs
-    pinMode(12,OUTPUT); 
-    pinMode(13,OUTPUT);
+    pinMode(relayOne,OUTPUT); 
+    pinMode(relayTwo,OUTPUT);
 
     //Set each relay pin to HIGH
     digitalWrite(relayOne, HIGH);   // sets relayOne on
@@ -63,6 +63,10 @@ void loop()
       deviceOne->serverLoop();
       deviceTwo->serverLoop();
 	 }
+   else {
+      setup();
+      delay(5000);
+   }
 }
 
 void deviceOneOn() {

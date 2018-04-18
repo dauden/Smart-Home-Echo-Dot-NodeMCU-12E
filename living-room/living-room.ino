@@ -83,6 +83,10 @@ void loop()
       deviceThree->serverLoop();
       deviceFour->serverLoop();
 	 }
+   else {
+      setup();
+      delay(5000);
+   }
 }
 
 void deviceOneOn() {
