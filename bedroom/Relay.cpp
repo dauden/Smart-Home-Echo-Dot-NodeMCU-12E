@@ -6,7 +6,7 @@ Relay::Relay(){
     Serial.println("default constructor called");
 }
 
-Relay::Relay(String alexaInvokeName, unsigned int port, CallbackFunction oncb, CallbackFunction offcb, CallbackFunction statecb){
+Relay::Relay(String alexaInvokeName, unsigned int port, CallbackFunction oncb, CallbackFunction offcb){
     uint32_t chipId = ESP.getChipId();
     char uuid[64];
     sprintf_P(uuid, PSTR("38323636-4558-4dda-9189-cda0e6%02x%02x%02x"),
@@ -21,7 +21,6 @@ Relay::Relay(String alexaInvokeName, unsigned int port, CallbackFunction oncb, C
     localPort = port;
     turnOnRelay = oncb;
     turnOffRelay = offcb;
-    getRelayState = statecb;
 
     startWebServer();
 }
@@ -114,18 +113,19 @@ void Relay::handleUpnpControl(){
   if(request.indexOf("SetBinaryState") >= 0) {
     if(request.indexOf("<BinaryState>1</BinaryState>") >= 0) {
       Serial.println("Got Turn on request");
-      turnOnRelay(false);
+      turnOnRelay();
     }
     if(request.indexOf("<BinaryState>0</BinaryState>") >= 0) {
       Serial.println("Got Turn off request");
-      turnOffRelay(false);
+      turnOffRelay();
     }
  }
 
-  if(request.indexOf("GetBinaryState") >= 0) {
-    Serial.println("Got binary state request");
-    getRelayState(false);
-  }
+  respondToRequest();
+}
+
+void Relay::setRelayState(boolean state){
+  relayState = state;
 }
 
 void Relay::handleRoot(){
@@ -140,18 +140,15 @@ void Relay::handleSwitch(){
     int request = (request1).toInt();
     if(request == 1) {
         Serial.println("Got switch Turn on request");
-        turnOnRelay(true);
+        turnOnRelay();
     }
     
     if(request == 0) {
         Serial.println("Got switch Turn off request");
-        turnOffRelay(true);
+        turnOffRelay();
     }
   }
-  else {
-    Serial.println("Got binary state request");
-    getRelayState(true);
-  }
+  respondJsonToRequest();
 }
 
 void Relay::handleSetupXml(){
@@ -226,21 +223,21 @@ void Relay::respondToSearch(IPAddress& senderIP, unsigned int senderPort) {
    Serial.println("Response sent !");
 }
 
-void Relay::respondJsonToRequest(unsigned int state) {
+void Relay::respondJsonToRequest() {
   String body = "{ \"On\":";
-  body += (state ? "true" : "false");
+  body += (relayState ? "true" : "false");
   body +=  "}";
  
    server->send(200, "text/xml", body.c_str());
 }
 
-void Relay::respondToRequest(unsigned int state) {
+void Relay::respondToRequest() {
   String body = 
       "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"><s:Body>\r\n"
       "<u:GetBinaryStateResponse xmlns:u=\"urn:Belkin:service:basicevent:1\">\r\n"
       "<BinaryState>";
       
-  body += (state ? "1" : "0");
+  body += (relayState ? "1" : "0");
   
   body += "</BinaryState>\r\n"
       "</u:GetBinaryStateResponse>\r\n"

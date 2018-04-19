@@ -3,6 +3,6 @@
 
 #include <Arduino.h>
 
-typedef void (*CallbackFunction) (boolean);
+typedef void (*CallbackFunction) ();
 
 #endif

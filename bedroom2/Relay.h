@@ -7,7 +7,7 @@
 #include <WiFiUDP.h>
 #include "CallbackFunction.h"
 
-class Device {
+class Relay {
 private:
         ESP8266WebServer *server = NULL;
         WiFiUDP UDP;
@@ -15,8 +15,9 @@ private:
         String persistentUuid;
         String deviceName;
         unsigned int localPort;
-        CallbackFunction onCallback;
-        CallbackFunction offCallback;
+        boolean relayState;
+        CallbackFunction turnOnRelay;
+        CallbackFunction turnOffRelay;
 
         void startWebServer();
         void handleEventservice();
@@ -25,12 +26,15 @@ private:
         void handleSetupXml();
         void handleSwitch();
 public:
-        Device();
-        Device(String alexaInvokeName, unsigned int port, CallbackFunction onCallback, CallbackFunction offCallback);
-        ~Device();
+        Relay();
+        Relay(String alexaInvokeName, unsigned int port, CallbackFunction tournOnRelay, CallbackFunction turnOffRelay);
+        ~Relay();
         String getAlexaInvokeName();
+        void setRelayState(boolean state);
         void serverLoop();
         void respondToSearch(IPAddress& senderIP, unsigned int senderPort);
+        void respondToRequest();
+        void respondJsonToRequest();
 };
 
 #endif

@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <WiFiUDP.h>
-#include "Device.h"
+#include "Relay.h"
 
 class UpnpBroadcastResponder {
 private:
@@ -14,7 +14,7 @@ public:
         ~UpnpBroadcastResponder();
         bool beginUdpMulticast();
         void serverLoop();
-        void addDevice(Device& device);
+        void addDevice(Relay& device);
 };
  
 #endif

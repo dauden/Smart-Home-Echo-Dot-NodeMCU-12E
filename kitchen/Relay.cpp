@@ -1,12 +1,12 @@
-#include "Device.h"
+#include "Relay.h"
 #include "CallbackFunction.h"
        
-Device::Device(){
+Relay::Relay(){
     Serial.println("I'm ready!!!");
     Serial.println("default constructor called");
 }
 
-Device::Device(String alexaInvokeName, unsigned int port, CallbackFunction oncb, CallbackFunction offcb){
+Relay::Relay(String alexaInvokeName, unsigned int port, CallbackFunction oncb, CallbackFunction offcb){
     uint32_t chipId = ESP.getChipId();
     char uuid[64];
     sprintf_P(uuid, PSTR("38323636-4558-4dda-9189-cda0e6%02x%02x%02x"),
@@ -19,26 +19,26 @@ Device::Device(String alexaInvokeName, unsigned int port, CallbackFunction oncb,
 
     deviceName = alexaInvokeName;
     localPort = port;
-    onCallback = oncb;
-    offCallback = offcb;
+    turnOnRelay = oncb;
+    turnOffRelay = offcb;
 
     startWebServer();
 }
 
 
 //<<destructor>>
-Device::~Device(){
+Relay::~Relay(){
   //to do : not do anything
 }
 
-void Device::serverLoop(){
+void Relay::serverLoop(){
     if (server != NULL) {
         server->handleClient();
         delay(1);
     }
 }
 
-void Device::startWebServer(){
+void Relay::startWebServer(){
   server = new ESP8266WebServer(localPort);
 
   server->on("/", [&]() {
@@ -59,6 +59,7 @@ void Device::startWebServer(){
   });
 
   server->on("/switch", HTTP_GET, [&]() {
+    Serial.println("should handler by switch function!!!");
     handleSwitch();  
   });
   
@@ -68,7 +69,7 @@ void Device::startWebServer(){
   Serial.println(localPort);
 }
 
-void Device::handleEventservice(){
+void Relay::handleEventservice(){
   Serial.println(" ########## Responding to eventservice.xml ... ########\n");
 
   String eventservice_xml = "<?scpd xmlns=\"urn:Belkin:service-1-0\"?>"
@@ -102,46 +103,55 @@ void Device::handleEventservice(){
     server->send(200, "text/plain", eventservice_xml.c_str());
 }
  
-void Device::handleUpnpControl(){
+void Relay::handleUpnpControl(){
   Serial.println("########## Responding to  /upnp/control/basicevent1 ... ##########");      
   
   String request = server->arg(0);      
   Serial.print("request:");
   Serial.println(request);
 
-  if(request.indexOf("<BinaryState>1</BinaryState>") > 0) {
+  if(request.indexOf("SetBinaryState") >= 0) {
+    if(request.indexOf("<BinaryState>1</BinaryState>") >= 0) {
       Serial.println("Got Turn on request");
-      onCallback();
-  }
-
-  if(request.indexOf("<BinaryState>0</BinaryState>") > 0) {
+      turnOnRelay();
+    }
+    if(request.indexOf("<BinaryState>0</BinaryState>") >= 0) {
       Serial.println("Got Turn off request");
-      offCallback();
-  }
-  
-  server->send(200, "text/plain", "Ok");
+      turnOffRelay();
+    }
+ }
+
+  respondToRequest();
 }
 
-void Device::handleRoot(){
+void Relay::setRelayState(boolean state){
+  relayState = state;
+}
+
+void Relay::handleRoot(){
   server->send(200, "text/plain", "You should tell Alexa to discover devices");
 }
 
-void Device::handleSwitch(){
+void Relay::handleSwitch(){
   Serial.println("########## Responding to switch on/off get request ... ##########");
-  int request = (server->arg(0)).toInt();
-  if(request == 1) {
-      Serial.println("Got switch Turn on request");
-      onCallback();
+  String request1 = server->arg(0);      
+  Serial.println("req: >> " + request1);
+  if(request1 != "") {
+    int request = (request1).toInt();
+    if(request == 1) {
+        Serial.println("Got switch Turn on request");
+        turnOnRelay();
+    }
+    
+    if(request == 0) {
+        Serial.println("Got switch Turn off request");
+        turnOffRelay();
+    }
   }
-  
-  if(request == 0) {
-      Serial.println("Got switch Turn off request");
-      offCallback();
-  }
-  server->send(200, "text/plain", "Switch is ok!");
+  respondJsonToRequest();
 }
 
-void Device::handleSetupXml(){
+void Relay::handleSetupXml(){
   Serial.println(" ########## Responding to setup.xml ... ########\n");
   
   IPAddress localIP = WiFi.localIP();
@@ -178,11 +188,11 @@ void Device::handleSetupXml(){
     Serial.println(setup_xml);
 }
 
-String Device::getAlexaInvokeName() {
+String Relay::getAlexaInvokeName() {
     return deviceName;
 }
 
-void Device::respondToSearch(IPAddress& senderIP, unsigned int senderPort) {
+void Relay::respondToSearch(IPAddress& senderIP, unsigned int senderPort) {
   Serial.println("");
   Serial.print("Sending response to ");
   Serial.println(senderIP);
@@ -211,4 +221,27 @@ void Device::respondToSearch(IPAddress& senderIP, unsigned int senderPort) {
   UDP.endPacket();                    
 
    Serial.println("Response sent !");
+}
+
+void Relay::respondJsonToRequest() {
+  String body = "{ \"On\":";
+  body += (relayState ? "true" : "false");
+  body +=  "}";
+ 
+   server->send(200, "text/xml", body.c_str());
+}
+
+void Relay::respondToRequest() {
+  String body = 
+      "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"><s:Body>\r\n"
+      "<u:GetBinaryStateResponse xmlns:u=\"urn:Belkin:service:basicevent:1\">\r\n"
+      "<BinaryState>";
+      
+  body += (relayState ? "1" : "0");
+  
+  body += "</BinaryState>\r\n"
+      "</u:GetBinaryStateResponse>\r\n"
+      "</s:Body> </s:Envelope>\r\n";
+ 
+   server->send(200, "text/xml", body.c_str());
 }

@@ -1,5 +1,5 @@
 #include "UpnpBroadcastResponder.h"
-#include "Device.h"
+#include "Relay.h"
 #include <functional>
  
 // Multicast declarations
@@ -9,7 +9,7 @@ unsigned int localPort = 1900;      // local port to listen on
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE];   
 
 #define MAX_DeviceES 14
-Device Devicees[MAX_DeviceES] = {};
+Relay Devicees[MAX_DeviceES] = {};
 int numOfDevices = 0;
 
 //#define numOfDevices (sizeof(Devicees)/sizeof(Device)) //array size  
@@ -44,7 +44,7 @@ bool UpnpBroadcastResponder::beginUdpMulticast(){
 
 //Device *ptrArray;
 
-void UpnpBroadcastResponder::addDevice(Device& device) {
+void UpnpBroadcastResponder::addDevice(Relay& device) {
   Serial.print("Adding Device : ");
   Serial.print(device.getAlexaInvokeName());
   Serial.print(" index : ");
@@ -72,14 +72,15 @@ void UpnpBroadcastResponder::serverLoop(){
   // check if this is a M-SEARCH for WeMo device
   String request = packetBuffer;
 
-  if(request.indexOf('M-SEARCH') > 0) {
-      if(request.indexOf("urn:Belkin:device:**") > 0) {
+  if(request.indexOf("M-SEARCH") >= 0) {
+      if((request.indexOf("urn:Belkin:device:**") > 0) || (request.indexOf("ssdp:all") > 0) || (request.indexOf("upnp:rootdevice") > 0)) {
+
         Serial.println("Got UDP Belkin Request..");
         
         // int arrSize = sizeof(Devices) / sizeof(Device);
       
         for(int n = 0; n < numOfDevices; n++) {
-            Device &sw = Devicees[n];
+            Relay &sw = Devicees[n];
 
             if (&sw != NULL) {
               sw.respondToSearch(senderIP, senderPort);              

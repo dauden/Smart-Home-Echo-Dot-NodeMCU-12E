@@ -15,9 +15,9 @@ private:
         String persistentUuid;
         String deviceName;
         unsigned int localPort;
+        boolean relayState;
         CallbackFunction turnOnRelay;
         CallbackFunction turnOffRelay;
-        CallbackFunction getRelayState;
 
         void startWebServer();
         void handleEventservice();
@@ -27,13 +27,14 @@ private:
         void handleSwitch();
 public:
         Relay();
-        Relay(String alexaInvokeName, unsigned int port, CallbackFunction tournOnRelay, CallbackFunction turnOffRelay, CallbackFunction getRelayState);
+        Relay(String alexaInvokeName, unsigned int port, CallbackFunction tournOnRelay, CallbackFunction turnOffRelay);
         ~Relay();
         String getAlexaInvokeName();
+        void setRelayState(boolean state);
         void serverLoop();
         void respondToSearch(IPAddress& senderIP, unsigned int senderPort);
-        void respondToRequest(unsigned int state);
-        void respondJsonToRequest(unsigned int state);
+        void respondToRequest();
+        void respondJsonToRequest();
 };
 
 #endif
