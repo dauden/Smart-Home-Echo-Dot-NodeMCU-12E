@@ -22,8 +22,9 @@ Relay::Relay(String alexaInvokeName, unsigned int port, unsigned int pinControl,
   localPinState = pinState;
 
   pinMode(localPinControl, OUTPUT);
-  pinMode(localPinState, INPUT);
-  digitalWrite(localPinControl, HIGH);   // sets relayOne on
+  pinMode(localPinState, INPUT_PULLUP);
+  
+  digitalWrite(localPinControl, HIGH);   // set relay on
 
   startWebServer();
 }
@@ -293,7 +294,7 @@ int Relay::getRelayState() {
 void Relay::turnOnRelay() {
   Serial.print("Request turn relay on ...");
   relayState = getRelayState();
-  if (relayState == 0) {
+  if (relayState == LOW) {
     Serial.print("Turn relay is on...");
     digitalWrite(localPinControl, !digitalRead(localPinControl));   // set relay on
   } else {
@@ -304,7 +305,7 @@ void Relay::turnOnRelay() {
 void Relay::turnOffRelay() {
   Serial.print("Request turn relay off ...");
   relayState = getRelayState();
-  if (relayState == 1) {
+  if (relayState == HIGH) {
     Serial.print("Turn relay is off...");
     digitalWrite(localPinControl, !digitalRead(localPinControl));   // set relay on
   } else {

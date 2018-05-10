@@ -15,12 +15,12 @@ Relay *deviceTwo = NULL;
 Relay *deviceThree = NULL;
 
 // Set Relay Pins
-int relayOneControl = 13; //D7=GPI013
-int relayOneState = 4; //D2=GPI04
-int relayTwoControl = 14; //D5=GPI014
-int relayTwoState = 5; //D1=GPI05
-int relayThreeControl = 15; //D8=GPI015
-int relayThreeState = 9; //D3=GPI09
+int relayOneControl = 12; //D6=GPI012
+int relayOneState = 3; //D9=GPI03
+int relayTwoControl = 13; //D7=GPI013
+int relayTwoState = 4; //D2=GPI04
+int relayThreeControl = 14; //D5=GPI014
+int relayThreeState = 5; //D1=GPI05
 
 void setup()
 {
