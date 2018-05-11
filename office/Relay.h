@@ -5,7 +5,6 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <WiFiUDP.h>
-#include "CallbackFunction.h"
 
 class Relay {
 private:

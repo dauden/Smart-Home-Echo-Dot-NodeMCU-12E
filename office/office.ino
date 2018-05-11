@@ -4,7 +4,6 @@
 #include "WifiManagement.h"
 #include "Relay.h"
 #include "UpnpBroadcastResponder.h"
-#include "CallbackFunction.h"
 
 boolean wifiConnected = false;
 

@@ -4,8 +4,8 @@
 #include <functional>
 
 // Change this before you flash
-const char* ssid = "internal-server-error";
-const char* password = "anhnguyen103";
+const char* ssid = "Out-lan";
+const char* password = "change me";
 
 //<<constructor>>
 WifiManagement::WifiManagement(){}

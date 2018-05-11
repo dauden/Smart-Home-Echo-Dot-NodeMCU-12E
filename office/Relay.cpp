@@ -1,5 +1,4 @@
 #include "Relay.h"
-#include "CallbackFunction.h"
 
 Relay::Relay() {
   Serial.println("I'm ready!!!");
@@ -130,16 +129,16 @@ void Relay::handleRoot() {
 
 void Relay::handleRelay() {
   Serial.println("########## Responding to switch on/off get request ... ##########");
-  String request1 = server->arg(0);
-  Serial.println("req: >> " + request1);
-  if (request1 != "") {
-    int request = (request1).toInt();
-    if (request == 1) {
+  String request = server->arg(0);
+  Serial.println("req: >> " + request);
+  if (request != "") {
+    
+    if (request == "true") {
       Serial.println("Got switch Turn on request");
       turnOnRelay();
     }
 
-    if (request == 0) {
+    if (request == "false") {
       Serial.println("Got switch Turn off request");
       turnOffRelay();
     }
@@ -263,22 +262,23 @@ int Relay::getMaxSensorValue()
 }
 
 void Relay::getRelayState() {
-  sensorMax = getMaxSensorValue();
-  Serial.print("sensorMax = ");
-  Serial.println(sensorMax);
-  //the VCC on the Grove interface of the sensor is 5v
-  amplitudeCurrent = (float)sensorMax / 1024 * 5 / 200 * 1000000;
-  effectiveValue = amplitudeCurrent / 1.414;
-  Serial.println("The effective value of the current is(in mA)");
-  Serial.println(effectiveValue, 1);
-
-  if (effectiveValue > deviceOnCurrentThreshold) {
-    Serial.println("Relay is on");
-    relayState = 1 ;
-  } else {
-    Serial.println("Relay is off");
-    relayState = 0 ;
-  }
+  relayState = digitalRead(relayPinControl);
+//  sensorMax = getMaxSensorValue();
+//  Serial.print("sensorMax = ");
+//  Serial.println(sensorMax);
+//  //the VCC on the Grove interface of the sensor is 5v
+//  amplitudeCurrent = (float)sensorMax / 1024 * 5 / 200 * 1000000;
+//  effectiveValue = amplitudeCurrent / 1.414;
+//  Serial.println("The effective value of the current is(in mA)");
+//  Serial.println(effectiveValue, 1);
+//
+//  if (effectiveValue > deviceOnCurrentThreshold) {
+//    Serial.println("Relay is on");
+//    relayState = 1 ;
+//  } else {
+//    Serial.println("Relay is off");
+//    relayState = 0 ;
+//  }
 }
 void Relay::turnOnRelay() {
   Serial.print("Request turn relay on ...");

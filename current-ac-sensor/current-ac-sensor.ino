@@ -1,83 +1,46 @@
-#include <functional>
-
-int sensorTA12 = A0; // Analog input pin that sensor is attached to
-
-float nVPP;   // Voltage measured across resistor
-float nCurrThruResistorPP; // Peak Current Measured Through Resistor
-float nCurrThruResistorRMS; // RMS current through Resistor
-float nCurrentThruWire;     // Actual RMS current in Wire
-
+#define ELECTRICITY_SENSOR 12 //
+float amplitude_current; //
+float effective_value; //
 void setup()
 {
-  Serial.begin(115200);
-  pinMode(sensorTA12, INPUT);
+  Serial.begin(9600);
+  pins_init();
 }
-
 void loop()
 {
-  nVPP = getVPP();
-
-  /*
-    Use Ohms law to calculate current across resistor
-    and express in mA
-  */
-
-  nCurrThruResistorPP = (nVPP / 200.0) * 1000.0;
-
-  /*
-    Use Formula for SINE wave to convert
-    to RMS
-  */
-
-  nCurrThruResistorRMS = nCurrThruResistorPP * 0.707;
-
-  /*
-    Current Transformer Ratio is 1000:1...
-
-    Therefore current through 200 ohm resistor
-    is multiplied by 1000 to get input current
-  */
-
-  nCurrentThruWire = nCurrThruResistorRMS * 1000;
-
-
-  Serial.print("Volts Peak : ");
-  Serial.println(nVPP, 3);
-
-
-  Serial.print("Current Through Resistor (Peak) : ");
-  Serial.print(nCurrThruResistorPP, 3);
-  Serial.println(" mA Peak to Peak");
-
-  Serial.print("Current Through Resistor (RMS) : ");
-  Serial.print(nCurrThruResistorRMS, 3);
-  Serial.println(" mA RMS");
-
-  Serial.print("Current Through Wire : ");
-  Serial.print(nCurrentThruWire, 3);
-  Serial.println(" mA RMS");
-
-  Serial.println();
+  int sensor_max;
+  sensor_max = getMaxValue();
+  Serial.print("sensor_max = ");
+  Serial.println(sensor_max);
+  //the VCC on the Grove interface of the sensor is 5v
+  amplitude_current = (float)sensor_max / 1024 * 5 / 200 * 1000000;
+  effective_value = amplitude_current / 1.414;
+  //Minimum current value can be detected=1/1024*5/200*1000000/1.414=24.4(mA)
+  //Only for sinusoidal alternating current
+  Serial.println("The amplitude of the current is(in mA)");
+  Serial.println(amplitude_current, 1); //Only one number after the decimal point
+  Serial.println("The effective value of the current is(in mA)");
+  Serial.println(effective_value, 1);
 }
-float getVPP()
+void pins_init()
 {
-  float result;
-  int readValue;             //value read from the sensor
-  int maxValue = 0;          // store max value here
+  pinMode(ELECTRICITY_SENSOR, INPUT);
+}
+/*Function: Sample for 1000ms and get the maximum value from the SIG pin*/
+int getMaxValue()
+{
+  int sensorValue; //value read from the sensor
+  int sensorMax = 0;
   uint32_t start_time = millis();
-  while ((millis() - start_time) < 1000) //sample for 1 Sec
+  while ((millis() - start_time) < 1000) //sample for 1000ms
   {
-    readValue = analogRead(sensorTA12);
-    // see if you have a new maxValue
-    if (readValue > maxValue)
+    sensorValue = analogRead(ELECTRICITY_SENSOR);
+    if (sensorValue > sensorMax)
     {
       /*record the maximum sensor value*/
-      maxValue = readValue;
+      sensorMax = sensorValue;
     }
   }
+  return sensorMax;
 
-  // Convert the digital data to a voltage
-  result = (maxValue * 5.0) / 1024.0;
-
-  return result;
 }
