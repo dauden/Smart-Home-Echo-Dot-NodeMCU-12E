@@ -5,7 +5,7 @@
 
 // Change this before you flash
 const char* ssid = "internal-server-error";
-const char* password = "change me";
+const char* password = "change me :::::";
 
 //<<constructor>>
 WifiManagement::WifiManagement(){}

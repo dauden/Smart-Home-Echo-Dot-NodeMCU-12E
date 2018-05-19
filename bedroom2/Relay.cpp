@@ -1,3 +1,7 @@
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+#include <WiFiUdp.h>
 #include "Relay.h"
 
 Relay::Relay() {
@@ -137,12 +141,12 @@ void Relay::handleSwitch() {
   String request = server->arg(0);
   Serial.println("req: >> " + request);
   if (request != "") {
-    if (request == "true") {
+    if (request == "true" || request == "TRUE") {
       Serial.println("Got switch Turn on request");
       turnOnRelay();
     }
 
-    if (request == "false") {
+    if (request == "false" || request == "FALSE") {
       Serial.println("Got switch Turn off request");
       turnOffRelay();
     }
