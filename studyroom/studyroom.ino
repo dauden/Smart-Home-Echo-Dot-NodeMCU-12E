@@ -26,38 +26,41 @@ int relayThreeState = 5; //D1=GPI05
 void setup()
 {
   Serial.begin(115200);
-   
+
   // Initialise wifi connection
   wifiConnected = wifiManagement.connectWifi();
-  
-  if(wifiConnected){
+
+  if (wifiConnected) {
     upnpBroadcastResponder.beginUdpMulticast();
-    
+
     // Define your Devicees here. Max 14
     // Format: Alexa invocation name, local port no, control pin, get state pin
     deviceOne = new Relay("Study Light", 81, relayOneControl, relayOneState);
-    deviceTwo = new Relay("Bedroom Outlet", 82, relayTwoControl, relayTwoState);
-    deviceThree = new Relay("Bedroom Fan", 83, relayThreeControl, relayThreeState);
-    
+    deviceTwo = new Relay("Study Outlet", 82, relayTwoControl, relayTwoState);
+    deviceThree = new Relay("Study Fan", 83, relayThreeControl, relayThreeState);
+
     Serial.println("Adding Devicees upnp broadcast responder");
     upnpBroadcastResponder.addDevice(*deviceOne);
     upnpBroadcastResponder.addDevice(*deviceTwo);
     upnpBroadcastResponder.addDevice(*deviceThree);
-    
+    deviceOne->initing();
+    deviceTwo->initing();
+    deviceThree->initing();
+
   }
 }
- 
+
 void loop()
 {
-	 if(wifiConnected){
-      upnpBroadcastResponder.serverLoop();
-      
-      deviceOne->serverLoop();
-      deviceTwo->serverLoop();
-      deviceThree->serverLoop();
-	 }
-   else {
-      setup();
-      delay(5000);
-   }
+  if (wifiConnected) {
+    upnpBroadcastResponder.serverLoop();
+
+    deviceOne->serverLoop();
+    deviceTwo->serverLoop();
+    deviceThree->serverLoop();
+  }
+  else {
+    setup();
+    delay(5000);
+  }
 }

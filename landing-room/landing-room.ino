@@ -38,6 +38,8 @@ void setup()
     Serial.println("Adding Devicees upnp broadcast responder");
     upnpBroadcastResponder.addDevice(*deviceOne);
     upnpBroadcastResponder.addDevice(*deviceTwo);
+    deviceOne->initing();
+    deviceTwo->initing();
 
   }
 }

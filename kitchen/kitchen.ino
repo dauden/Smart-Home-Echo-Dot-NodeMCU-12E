@@ -48,7 +48,10 @@ void setup()
     upnpBroadcastResponder.addDevice(*deviceTwo);
     upnpBroadcastResponder.addDevice(*deviceThree);
     upnpBroadcastResponder.addDevice(*deviceFour);
-
+    deviceOne->initing();
+    deviceTwo->initing();
+    deviceThree->initing();
+    deviceFour->initing();
   }
 }
  

@@ -14,7 +14,6 @@ class Relay {
     String persistentUuid;
     String deviceName;
     unsigned int localPort;
-    int relayState;
     unsigned int localPinControl;
     unsigned int localPinState;
     float amplitudeCurrent; //amplitude current
@@ -37,6 +36,7 @@ class Relay {
     ~Relay();
     String getAlexaInvokeName();
     int getRelayState();
+    void initing();
     void serverLoop();
     void respondToSearch(IPAddress& senderIP, unsigned int senderPort);
     void respondToRequest();

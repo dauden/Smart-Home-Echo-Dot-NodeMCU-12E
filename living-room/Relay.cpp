@@ -25,11 +25,6 @@ Relay::Relay(String alexaInvokeName, unsigned int port, unsigned int pinControl,
   localPinControl = pinControl;
   localPinState = pinState;
 
-  pinMode(localPinControl, OUTPUT);
-  pinMode(localPinState, INPUT_PULLUP);
-  
-  digitalWrite(localPinControl, HIGH);   // set relay on
-
   startWebServer();
 }
 
@@ -39,12 +34,19 @@ Relay::~Relay() {
   //to do : not do anything
 }
 
+void Relay::initing() {
+  pinMode(localPinControl, OUTPUT);
+  pinMode(localPinState, INPUT_PULLUP);
+  digitalWrite(localPinControl, HIGH);   // set relay on
+}
+
 void Relay::serverLoop() {
   if (server != NULL) {
     server->handleClient();
     delay(10);
   }
 }
+
 
 void Relay::startWebServer() {
   server = new ESP8266WebServer(localPort);
@@ -128,7 +130,7 @@ void Relay::handleUpnpControl() {
       turnOffRelay();
     }
   }
-
+  delay(300);
   respondToRequest();
 }
 
@@ -151,6 +153,7 @@ void Relay::handleSwitch() {
       turnOffRelay();
     }
   }
+  delay(300);
   respondJsonToRequest();
 }
 
@@ -227,22 +230,25 @@ void Relay::respondToSearch(IPAddress& senderIP, unsigned int senderPort) {
 }
 
 void Relay::respondJsonToRequest() {
-  relayState = getRelayState();
+  int relayState = getRelayState();
+  Serial.print("State is >>> ");
+  Serial.println(relayState);
   String body = "{ \"On\":";
-  body += (relayState ? "true" : "false");
+  body += (relayState == HIGH ? "false" : "true" );
   body +=  "}";
-
+  Serial.print("body....");
+  Serial.println(body.c_str());
   server->send(200, "text/xml", body.c_str());
 }
 
 void Relay::respondToRequest() {
-  relayState = getRelayState();
+  int relayState = getRelayState();
   String body =
     "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"><s:Body>\r\n"
     "<u:GetBinaryStateResponse xmlns:u=\"urn:Belkin:service:basicevent:1\">\r\n"
     "<BinaryState>";
 
-  body += (relayState ? "1" : "0");
+  body += (relayState == HIGH ? "0" : "1");
 
   body += "</BinaryState>\r\n"
           "</u:GetBinaryStateResponse>\r\n"
@@ -271,11 +277,11 @@ int Relay::getMaxSensorValue()
 }
 
 int Relay::getRelayState() {
-  relayState = digitalRead(localPinControl);
-  Serial.print("detect analogRead >> ");
-  Serial.println(analogRead(localPinState));
-  Serial.print("detect digitalRead >> ");
-  Serial.println(digitalRead(localPinState));
+  int relayState = digitalRead(localPinControl);
+  Serial.print("detect state of pin ");
+  Serial.print(localPinControl);
+  Serial.print(" is ");
+  Serial.println(relayState);
   //  sensorMax = getMaxSensorValue();
   //  Serial.print("sensorMax = ");
   //  Serial.println(sensorMax);
@@ -296,23 +302,23 @@ int Relay::getRelayState() {
 }
 
 void Relay::turnOnRelay() {
-  Serial.print("Request turn relay on ...");
-  relayState = getRelayState();
-  if (relayState == LOW) {
-    Serial.print("Turn relay is on...");
-    digitalWrite(localPinControl, !digitalRead(localPinControl));   // set relay on
+  Serial.println("Request turn relay on ...");
+  int relayState = getRelayState();
+  if (relayState == HIGH) {
+    Serial.println("Turn relay is on...");
+    digitalWrite(localPinControl, LOW);   // set relay on
   } else {
-    Serial.print("Relay was on...");
+    Serial.println("Relay was on...");
   }
 }
 
 void Relay::turnOffRelay() {
-  Serial.print("Request turn relay off ...");
-  relayState = getRelayState();
-  if (relayState == HIGH) {
-    Serial.print("Turn relay is off...");
-    digitalWrite(localPinControl, !digitalRead(localPinControl));   // set relay on
+  Serial.println("Request turn relay off ...");
+  int relayState = getRelayState();
+  if (relayState == LOW) {
+    Serial.println("Turn relay is off...");
+    digitalWrite(localPinControl, HIGH);   // set relay on
   } else {
-    Serial.print("Relay was off...");
+    Serial.println("Relay was off...");
   }
 }
